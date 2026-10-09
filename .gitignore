@@ -1,0 +1,17 @@
+# Local database credentials
+/config.php
+/.env
+/.env.*
+!.env.example
+
+# Local databases and backups
+*.sqlite
+*.sqlite3
+*.db
+*.sql.gz
+*.bak
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
