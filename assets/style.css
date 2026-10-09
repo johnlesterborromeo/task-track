@@ -1088,7 +1088,6 @@ body.auth {
   padding: 38px 34px;
   width: 100%;
   max-width: 380px;
-  box-shadow: 0 30px 60px rgba(0,0,0,.4);
 }
 .auth-sub { text-align: center; color: var(--muted); font-size: 13.5px; margin: 6px 0 24px; }
 .auth-card label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 14px; }
