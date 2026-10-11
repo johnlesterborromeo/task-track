@@ -5,6 +5,10 @@ USE tasktrack;
 CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   username VARCHAR(50) NOT NULL UNIQUE,
+  display_name VARCHAR(80) NOT NULL DEFAULT '',
+  bio TEXT NULL,
+  profile_picture MEDIUMBLOB NULL,
+  profile_picture_mime VARCHAR(40) NULL,
   password_hash VARCHAR(255) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;

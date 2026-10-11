@@ -1,0 +1,22 @@
+ README.md                        |  13 [32m+[m[31m-[m
+ api.php                          | 179 [32m+++++++++[m[31m-[m
+ assets/T.png                     | Bin [31m0[m -> [32m3411[m bytes
+ assets/app.js                    | 686 [31m---------------------------------------[m
+ assets/app/account-navigation.js | 297 [32m+++++++++++++++++[m
+ assets/app/app-core.js           |  48 [32m+++[m
+ assets/app/calendar.js           |  49 [32m+++[m
+ assets/app/dashboard.js          | 132 [32m++++++++[m
+ assets/app/events.js             |  67 [32m++++[m
+ assets/app/helpers.js            |  29 [32m++[m
+ assets/app/history.js            |  35 [32m++[m
+ assets/app/init.js               |   2 [32m+[m
+ assets/app/modals.js             | 200 [32m++++++++++++[m
+ assets/app/notes.js              |  11 [32m+[m
+ assets/app/tasks.js              | 109 [32m+++++++[m
+ assets/favicon.svg               |   4 [31m-[m
+ assets/style.css                 | 301 [32m++++++++++++++[m[31m---[m
+ database.sql                     |   4 [32m+[m
+ index.php                        | 181 [32m+++++++++[m[31m--[m
+ login.php                        |   8 [32m+[m[31m-[m
+ profile_picture.php              |  19 [32m++[m
+ 21 files changed, 1616 insertions(+), 758 deletions(-)

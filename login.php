@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $stmt = $pdo->prepare('INSERT INTO users (username, password_hash) VALUES (?, ?)');
             $stmt->execute([$username, password_hash($password, PASSWORD_DEFAULT)]);
-            $_SESSION['user'] = ['id' => (int)$pdo->lastInsertId(), 'username' => $username];
+            $_SESSION['user'] = ['id' => (int)$pdo->lastInsertId(), 'username' => $username, 'display_name' => $username];
             header('Location: index.php');
             exit;
         } catch (PDOException $e) {
@@ -29,7 +29,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$username]);
         $user = $stmt->fetch();
         if ($user && password_verify($password, $user['password_hash'])) {
-            $_SESSION['user'] = ['id' => (int)$user['id'], 'username' => $user['username']];
+            $_SESSION['user'] = [
+                'id' => (int)$user['id'],
+                'username' => $user['username'],
+                'display_name' => trim($user['display_name'] ?? '') ?: $user['username'],
+            ];
             header('Location: index.php');
             exit;
         }

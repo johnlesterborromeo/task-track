@@ -27,7 +27,18 @@ TaskTrack/
 ├── login.php           # Sign-in and registration
 ├── logout.php          # Ends the current session
 └── assets/
-    ├── app.js          # Frontend behavior and API requests
+    ├── app/            # Frontend scripts, loaded in order by index.php
+    │   ├── app-core.js
+    │   ├── account-navigation.js
+    │   ├── helpers.js
+    │   ├── dashboard.js
+    │   ├── tasks.js
+    │   ├── notes.js
+    │   ├── calendar.js
+    │   ├── history.js
+    │   ├── modals.js
+    │   ├── events.js
+    │   └── init.js
     └── style.css       # App styles
 ```
 
