@@ -39,7 +39,16 @@ TaskTrack/
     │   ├── modals.js
     │   ├── events.js
     │   └── init.js
-    └── style.css       # App styles
+    └── design/         # Shared and feature-specific stylesheets
+        ├── style.css
+        ├── dashboard.css
+        ├── tasks.css
+        ├── notes.css
+        ├── calendar.css
+        ├── history.css
+        ├── modals.css
+        ├── auth.css
+        └── responsive.css
 ```
 
 ## Requirements
