@@ -242,7 +242,6 @@ function dashboardNoteCard(note) {
     <div class="dashboard-note-content">
       <div class="note-title">${esc(note.title)}</div>
       <div class="note-body">${esc(note.content || '')}</div>
-      <div class="note-time">edited ${timeAgo(note.updated_at)}</div>
     </div>
   </div>`;
 }
@@ -250,7 +249,10 @@ function dashboardNoteCard(note) {
 /* ================= Task rows ================= */
 function upcomingTaskCard(t) {
   const overdue = isOverdue(t) ? '<span class="badge overdue">Overdue</span>' : '';
-  const completeAction = t.status === 'in_progress';
+  const description = Array.from(String(t.description || ''));
+  const shortDescription = description.length > 20
+    ? description.slice(0, 20).join('') + '...'
+    : description.join('');
   return `<div class="task-row upcoming-task-card status-${t.status}" data-id="${t.id}">
     <div class="upcoming-task-head">
       <div class="task-title">${esc(t.title)}</div>
@@ -259,9 +261,9 @@ function upcomingTaskCard(t) {
       <span class="badge prio-${t.priority}">${esc(t.priority)}</span>
       <span class="badge status-badge">${STATUS[t.status]}</span>
     </div>
-    <div class="upcoming-task-description">${esc(t.description || '')}</div>
+    ${checklistProgress(t)}
+    <div class="upcoming-task-description">${esc(shortDescription)}</div>
     <div class="upcoming-task-due">${overdue}Due date: ${fmtDate(t.due_date)}</div>
-    <button class="upcoming-start${completeAction ? ' is-complete' : ''}" type="button">${completeAction ? 'Complete' : 'Start task'}</button>
   </div>`;
 }
 
@@ -272,6 +274,8 @@ function taskRow(t) {
     <div class="task-main">
       <div class="task-title">${esc(t.title)} ${od}</div>
       <div class="task-desc">${esc(t.description || '')}</div>
+      ${checklistProgress(t)}
+      ${checklistEntries(t)}
       <div class="task-meta">
         <span class="badge prio-${t.priority}">${t.priority}</span>
         <span class="due">${fmtDate(t.due_date)}</span>
@@ -279,6 +283,27 @@ function taskRow(t) {
     </div>
     <span class="badge status-badge">${STATUS[t.status]}</span>
   </div>`;
+}
+
+function checklistProgress(task) {
+  const items = task.checklist || [];
+  if (!items.length) return '';
+  const completed = items.filter(item => item.completed).length;
+  const percent = Math.round(completed * 100 / items.length);
+  return `<div class="task-checklist-progress">
+    <div class="task-checklist-progress-label"><span>Task progress</span><span>${percent}%</span></div>
+    <div class="task-checklist-progress-track" role="progressbar" aria-label="Task progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}"><span style="width:${percent}%"></span></div>
+  </div>`;
+}
+
+function checklistEntries(task) {
+  const items = task.checklist || [];
+  if (!items.length) return '';
+  return `<div class="task-checklist-entries">${items.map(item => `
+    <label class="task-checklist-entry">
+      <input class="task-checklist-toggle" type="checkbox" data-item-id="${item.id}"${item.completed ? ' checked' : ''}>
+      <span${item.completed ? ' class="is-complete"' : ''}>${esc(item.title)}</span>
+    </label>`).join('')}</div>`;
 }
 
 /* ================= Tasks view ================= */
@@ -328,7 +353,6 @@ async function loadNotes() {
     ? state.notes.map(n => `<div class="note-card" data-id="${n.id}">
         <div class="note-title">${esc(n.title)}</div>
         <div class="note-body">${esc(n.content || '')}</div>
-        <div class="note-time">edited ${timeAgo(n.updated_at)}</div>
       </div>`).join('')
     : '<p class="empty">No notes yet. Jot something down!</p>';
 }
@@ -444,10 +468,24 @@ function openTaskModal(task = null) {
   f.description.value = task ? (task.description || '') : '';
   f.priority.value    = task ? task.priority : 'medium';
   f.due_date.value    = task && task.due_date ? task.due_date : '';
+  renderTaskChecklistEditor(task ? (task.checklist || []) : []);
   $('#task-modal-title').textContent = task ? 'Edit Task' : 'New Task';
   $('#btn-delete-task').style.display = task ? '' : 'none';
+  const statusButton = $('#btn-task-status');
+  statusButton.hidden = !task || task.status === 'done';
+  statusButton.classList.toggle('is-complete', task && task.status === 'in_progress');
+  statusButton.textContent = task && task.status === 'in_progress' ? 'Complete task' : 'Start task';
   openModal('#task-modal');
   f.title.focus();
+}
+
+function renderTaskChecklistEditor(items) {
+  $('#task-checklist-edit-items').innerHTML = items.map(item => `
+    <div class="task-checklist-edit-row">
+      <input class="task-checklist-edit-completed" type="checkbox" aria-label="Checklist item completed"${item.completed ? ' checked' : ''}>
+      <input class="task-checklist-edit-title" type="text" maxlength="150" placeholder="Checklist item" value="${esc(item.title)}">
+      <button type="button" class="task-checklist-remove" aria-label="Remove checklist item">&times;</button>
+    </div>`).join('');
 }
 
 function openReminderTaskCard(task) {
@@ -488,6 +526,17 @@ $('#btn-add-task').addEventListener('click', () => openTaskModal());
 $('#dash-add-task').addEventListener('click', () => openTaskModal());
 $('#btn-add-note').addEventListener('click', () => openNoteModal());
 $('#dash-add-note').addEventListener('click', () => openNoteModal());
+$('#task-checklist-add').addEventListener('click', () => {
+  const row = document.createElement('div');
+  row.className = 'task-checklist-edit-row';
+  row.innerHTML = '<input class="task-checklist-edit-completed" type="checkbox" aria-label="Checklist item completed"><input class="task-checklist-edit-title" type="text" maxlength="150" placeholder="Checklist item"><button type="button" class="task-checklist-remove" aria-label="Remove checklist item">&times;</button>';
+  $('#task-checklist-edit-items').append(row);
+  $('.task-checklist-edit-title', row).focus();
+});
+$('#task-checklist-edit-items').addEventListener('click', e => {
+  const remove = e.target.closest('.task-checklist-remove');
+  if (remove) remove.closest('.task-checklist-edit-row').remove();
+});
 
 $('#task-form').addEventListener('submit', async e => {
   e.preventDefault();
@@ -496,7 +545,11 @@ $('#task-form').addEventListener('submit', async e => {
     title:       f.title.value.trim(),
     description: f.description.value,
     priority:    f.priority.value,
-    due_date:    f.due_date.value || null
+    due_date:    f.due_date.value || null,
+    checklist:   $$('.task-checklist-edit-row', $('#task-checklist-edit-items')).map(row => ({
+      title: $('.task-checklist-edit-title', row).value.trim(),
+      completed: $('.task-checklist-edit-completed', row).checked
+    })).filter(item => item.title)
   };
   if (f.id.value) {
     data.id = f.id.value;
@@ -511,6 +564,17 @@ $('#task-form').addEventListener('submit', async e => {
 $('#btn-delete-task').addEventListener('click', async () => {
   if (!confirm('Delete this task?')) return;
   await send('delete_task', { id: $('#task-form').id.value });
+  closeModals();
+  loadView();
+});
+
+$('#btn-task-status').addEventListener('click', async () => {
+  const id = $('#task-form').id.value;
+  const task = state.tasks.find(item => String(item.id) === String(id));
+  if (!task || task.status === 'done') return;
+  const status = task.status === 'todo' ? 'in_progress' : 'done';
+  if (status === 'done' && !confirm('Are you sure you want to complete this task?')) return;
+  await send('update_task', { id: task.id, status });
   closeModals();
   loadView();
 });
@@ -576,18 +640,6 @@ document.addEventListener('click', async e => {
     return;
   }
 
-  const startButton = e.target.closest('.upcoming-start');
-  if (startButton) {
-    const id = startButton.closest('.upcoming-task-card').dataset.id;
-    const task = state.tasks.find(x => String(x.id) === String(id));
-    if (task && task.status !== 'done') {
-      const status = task.status === 'todo' ? 'in_progress' : 'done';
-      await send('update_task', { id: task.id, status });
-      loadView();
-    }
-    return;
-  }
-
   const dot = e.target.closest('.status-dot');
   if (dot) {
     e.stopPropagation();
@@ -597,6 +649,14 @@ document.addEventListener('click', async e => {
       await send('update_task', { id: t.id, status: NEXT_STATUS[t.status] });
       loadView();
     }
+    return;
+  }
+
+  const checklistToggle = e.target.closest('.task-checklist-toggle');
+  if (checklistToggle) {
+    e.stopPropagation();
+    await send('toggle_checklist_item', { id: checklistToggle.dataset.itemId });
+    loadView();
     return;
   }
 

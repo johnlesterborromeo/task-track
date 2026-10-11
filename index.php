@@ -18,7 +18,7 @@ require_once __DIR__ . '/auth.php';
     document.documentElement.dataset.theme = savedTheme;
   }
 </script>
-<link rel="stylesheet" href="assets/style.css?v=106">
+<link rel="stylesheet" href="assets/style.css?v=117">
 </head>
 <body>
 <div class="app">
@@ -189,11 +189,17 @@ require_once __DIR__ . '/auth.php';
       </label>
       <label>Due date <input type="date" name="due_date"></label>
     </div>
-    <div class="modal-actions">
-      <button type="button" class="btn danger" id="btn-delete-task">Delete</button>
-      <span class="spacer"></span>
-      <button type="button" class="btn" data-close>Cancel</button>
+    <div class="task-checklist-editor">
+      <div class="task-checklist-editor-head">
+        <span>Checklist <span class="muted">(optional)</span></span>
+        <button type="button" class="btn small" id="task-checklist-add">+ Add item</button>
+      </div>
+      <div class="task-checklist-edit-items" id="task-checklist-edit-items"></div>
+    </div>
+    <div class="task-modal-actions">
       <button class="btn primary">Save</button>
+      <button type="button" class="btn task-action-button task-modal-status-button" id="btn-task-status" hidden></button>
+      <button type="button" class="btn danger" id="btn-delete-task">Delete</button>
     </div>
   </form>
 </div>
@@ -249,6 +255,6 @@ require_once __DIR__ . '/auth.php';
   </section>
 </div>
 
-<script src="assets/app.js?v=29"></script>
+<script src="assets/app.js?v=37"></script>
 </body>
 </html>

@@ -23,7 +23,52 @@ function cnt(PDO $pdo, string $sql, array $params): int
     return (int)$stmt->fetch()['c'];
 }
 
+function normalizeChecklist($items): array
+{
+    if (!is_array($items)) {
+        out(['error' => 'Checklist must be a list'], 422);
+    }
+
+    $checklist = [];
+    foreach ($items as $item) {
+        if (!is_array($item) || !isset($item['title']) || !is_string($item['title'])) {
+            out(['error' => 'Invalid checklist item'], 422);
+        }
+        $title = trim($item['title'] ?? '');
+        if ($title === '') {
+            continue;
+        }
+        $length = preg_match_all('/./us', $title, $matches);
+        if ($length === false) {
+            out(['error' => 'Checklist item titles must be valid UTF-8'], 422);
+        }
+        if ($length > 150) {
+            out(['error' => 'Checklist item titles must be 150 characters or fewer'], 422);
+        }
+        $checklist[] = ['title' => $title, 'completed' => !empty($item['completed']) ? 1 : 0];
+    }
+    return $checklist;
+}
+
+function saveChecklist(PDO $pdo, int $taskId, array $checklist): void
+{
+    $pdo->prepare('DELETE FROM task_checklist_items WHERE task_id=?')->execute([$taskId]);
+    $stmt = $pdo->prepare('INSERT INTO task_checklist_items (task_id, title, completed) VALUES (?, ?, ?)');
+    foreach ($checklist as $item) {
+        $stmt->execute([$taskId, $item['title'], $item['completed']]);
+    }
+}
+
 try {
+    $pdo->exec("CREATE TABLE IF NOT EXISTS task_checklist_items (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        task_id INT NOT NULL,
+        title VARCHAR(150) NOT NULL,
+        completed TINYINT(1) NOT NULL DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB");
+
     switch ($action) {
 
         case 'stats':
@@ -44,17 +89,43 @@ try {
                 $stmt = $pdo->prepare("SELECT * FROM tasks WHERE user_id=? ORDER BY (status='done'), (due_date IS NULL), due_date ASC, id DESC");
                 $stmt->execute([$uid]);
             }
-            out($stmt->fetchAll());
+            $tasks = $stmt->fetchAll();
+            if ($tasks) {
+                $taskIds = array_column($tasks, 'id');
+                $placeholders = implode(',', array_fill(0, count($taskIds), '?'));
+                $items = $pdo->prepare("SELECT id, task_id, title, completed FROM task_checklist_items WHERE task_id IN ($placeholders) ORDER BY id");
+                $items->execute($taskIds);
+                $byTask = [];
+                foreach ($items->fetchAll() as $item) {
+                    $item['completed'] = (bool)$item['completed'];
+                    $byTask[$item['task_id']][] = $item;
+                }
+                foreach ($tasks as &$task) {
+                    $task['checklist'] = $byTask[$task['id']] ?? [];
+                }
+                unset($task);
+            }
+            out($tasks);
 
         case 'add_task':
             $title = trim($in['title'] ?? '');
             if ($title === '') {
                 out(['error' => 'Title is required'], 422);
             }
-            $stmt = $pdo->prepare('INSERT INTO tasks (user_id, title, description, priority, due_date) VALUES (?, ?, ?, ?, ?)');
-            $stmt->execute([$uid, $title, $in['description'] ?? '', $in['priority'] ?? 'medium', ($in['due_date'] ?? null) ?: null]);
-            log_activity($pdo, 'task_created', (int)$pdo->lastInsertId(), 'Created task "' . $title . '"');
-            out(['ok' => true, 'id' => (int)$pdo->lastInsertId()]);
+            $checklist = normalizeChecklist($in['checklist'] ?? []);
+            $pdo->beginTransaction();
+            try {
+                $stmt = $pdo->prepare('INSERT INTO tasks (user_id, title, description, priority, due_date) VALUES (?, ?, ?, ?, ?)');
+                $stmt->execute([$uid, $title, $in['description'] ?? '', $in['priority'] ?? 'medium', ($in['due_date'] ?? null) ?: null]);
+                $id = (int)$pdo->lastInsertId();
+                saveChecklist($pdo, $id, $checklist);
+                $pdo->commit();
+            } catch (Throwable $e) {
+                $pdo->rollBack();
+                throw $e;
+            }
+            log_activity($pdo, 'task_created', $id, 'Created task "' . $title . '"');
+            out(['ok' => true, 'id' => $id]);
 
         case 'update_task':
             $id = (int)($in['id'] ?? 0);
@@ -64,6 +135,7 @@ try {
             if (!$task) {
                 out(['error' => 'Task not found'], 404);
             }
+            $checklist = array_key_exists('checklist', $in) ? normalizeChecklist($in['checklist']) : null;
             $title    = $in['title']       ?? $task['title'];
             $desc     = $in['description'] ?? $task['description'];
             $priority = $in['priority']    ?? $task['priority'];
@@ -76,13 +148,35 @@ try {
             if ($status !== 'done') {
                 $completed = null;
             }
-            $pdo->prepare('UPDATE tasks SET title=?, description=?, priority=?, due_date=?, status=?, completed_at=? WHERE id=?')
-                ->execute([$title, $desc, $priority, $due, $status, $completed, $id]);
+            $pdo->beginTransaction();
+            try {
+                $pdo->prepare('UPDATE tasks SET title=?, description=?, priority=?, due_date=?, status=?, completed_at=? WHERE id=?')
+                    ->execute([$title, $desc, $priority, $due, $status, $completed, $id]);
+                if ($checklist !== null) {
+                    saveChecklist($pdo, $id, $checklist);
+                }
+                $pdo->commit();
+            } catch (Throwable $e) {
+                $pdo->rollBack();
+                throw $e;
+            }
             if (isset($in['status'])) {
                 log_activity($pdo, 'task_status', $id, 'Moved "' . $title . '" to ' . $status);
             } else {
                 log_activity($pdo, 'task_updated', $id, 'Updated task "' . $title . '"');
             }
+            out(['ok' => true]);
+
+        case 'toggle_checklist_item':
+            $itemId = (int)($in['id'] ?? 0);
+            $stmt = $pdo->prepare('SELECT i.completed FROM task_checklist_items i JOIN tasks t ON t.id=i.task_id WHERE i.id=? AND t.user_id=?');
+            $stmt->execute([$itemId, $uid]);
+            $item = $stmt->fetch();
+            if (!$item) {
+                out(['error' => 'Checklist item not found'], 404);
+            }
+            $pdo->prepare('UPDATE task_checklist_items SET completed=? WHERE id=?')
+                ->execute([(int)!$item['completed'], $itemId]);
             out(['ok' => true]);
 
         case 'delete_task':
