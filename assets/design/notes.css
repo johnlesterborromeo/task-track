@@ -107,7 +107,14 @@
   background: rgba(255, 255, 255, .58);
   content: "";
 }
-.dashboard-notes-list .dashboard-note-card:hover { outline: 1px solid var(--hover-outline); outline-offset: -2px; background-color: #fff1a8; }
+.dashboard-notes-list .dashboard-note-card:hover {
+  transform: none;
+  outline: 1px solid var(--hover-outline);
+  outline-offset: -2px;
+  background-color: #fff1a8;
+  border-color: var(--border);
+  background: transparent;
+}
 .dashboard-notes-list .dashboard-note-icon { width: 32px; height: 32px; border-radius: 4px; background: rgba(120, 105, 48, .1); color: #5d5433; }
 .dashboard-notes-list .note-title { color: #352f1b; }
 .dashboard-notes-list .note-body { color: #5d5433; }

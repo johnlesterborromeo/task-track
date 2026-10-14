@@ -8,14 +8,14 @@ async function loadDashboard() {
   renderReminders(tasks);
 
   const cards = [
-    { label: 'Total tasks', value: stats.total,       cls: '',        icon: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5h6M9 10h6M9 14h6M9 18h4"/>' },
-    { label: 'In progress', value: stats.in_progress, cls: 'c-amber', icon: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>' },
-    { label: 'Completed',   value: stats.done,       cls: 'c-green',  icon: '<circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/>' },
-    { label: 'Overdue',     value: stats.overdue,    cls: 'c-red',    icon: '<path d="M12 3 2.8 19a1.4 1.4 0 0 0 1.2 2h16a1.4 1.4 0 0 0 1.2-2L12 3Z"/><path d="M12 9v5m0 3h.01"/>' }
+    { label: 'Total tasks', value: stats.total,       cls: '',        icon: 'assignment' },
+    { label: 'In progress', value: stats.in_progress, cls: 'c-amber', icon: 'schedule' },
+    { label: 'Completed',   value: stats.done,       cls: 'c-green',  icon: 'task_alt' },
+    { label: 'Overdue',     value: stats.overdue,    cls: 'c-red',    icon: 'warning' }
   ];
   $('#stat-cards').innerHTML = cards.map(c =>
     `<div class="stat-card ${c.cls}">
-      <svg class="stat-icon" viewBox="0 0 24 24" aria-hidden="true">${c.icon}</svg>
+      ${materialIcon(c.icon, 'stat-icon')}
       <div class="stat-value">${c.value}</div>
       <div class="stat-label">${c.label}</div>
     </div>`
@@ -25,9 +25,7 @@ async function loadDashboard() {
   const upcoming = tasks.filter(t => t.status !== 'done')
     .sort((a, b) => String(a.due_date || '9999').localeCompare(String(b.due_date || '9999')))
     .slice(0, 6);
-  $('#dash-upcoming').innerHTML = upcoming.length
-    ? `<div class="upcoming-task-list">${upcoming.map(upcomingTaskCard).join('')}</div>`
-    : '<p class="empty">Nothing on your plate. Enjoy!</p>';
+  renderUpcomingTasks(upcoming);
 
   $('#dash-activity').innerHTML = `<div class="dashboard-history-list dashboard-preview-list">${
     activity.length
@@ -40,6 +38,50 @@ async function loadDashboard() {
       ? notes.slice(0, 3).map(dashboardNoteCard).join('')
       : '<p class="empty">No notes yet. Add one to get started.</p>'
   }</div>`;
+}
+
+const DASHBOARD_TASK_VIEW_KEY = 'tasktrack-dashboard-task-view';
+const DASHBOARD_TASK_VIEWS = ['list', 'board', 'grid', 'timeline'];
+
+function renderUpcomingTasks(tasks) {
+  const savedView = localStorage.getItem(DASHBOARD_TASK_VIEW_KEY);
+  const view = DASHBOARD_TASK_VIEWS.includes(savedView) ? savedView : 'grid';
+  const menu = $('#dash-task-view-menu');
+  const toggle = $('#dash-task-view-toggle');
+  menu.querySelectorAll('[data-dashboard-task-view]').forEach(button => {
+    button.setAttribute('aria-checked', String(button.dataset.dashboardTaskView === view));
+  });
+  toggle.setAttribute('aria-label', `Choose task appearance. Current view: ${view} view`);
+
+  if (!tasks.length) {
+    $('#dash-upcoming').innerHTML = '<p class="empty">Nothing on your plate. Enjoy!</p>';
+    return;
+  }
+
+  if (view === 'board') {
+    const columns = ['todo', 'in_progress'];
+    $('#dash-upcoming').innerHTML = `<div class="dashboard-task-board">${columns.map(status => {
+      const columnTasks = tasks.filter(task => task.status === status);
+      return `<section class="dashboard-task-column">
+        <h4>${STATUS[status]}<span>${columnTasks.length}</span></h4>
+        <div class="upcoming-task-list">${columnTasks.map(upcomingTaskCard).join('') || '<p class="dashboard-task-column-empty">No tasks</p>'}</div>
+      </section>`;
+    }).join('')}</div>`;
+    return;
+  }
+
+  if (view === 'timeline') {
+    $('#dash-upcoming').innerHTML = `<div class="dashboard-task-timeline">${tasks.slice(0, 3).map(task => `
+      <div class="dashboard-timeline-item">
+        <div class="dashboard-timeline-date">${task.due_date ? fmtDate(task.due_date) : 'No due date'}</div>
+        <div class="dashboard-timeline-marker" aria-hidden="true"></div>
+        ${upcomingTaskCard(task)}
+      </div>`).join('')}</div>`;
+    return;
+  }
+
+  const layoutClass = view === 'list' ? 'is-list' : 'is-grid';
+  $('#dash-upcoming').innerHTML = `<div class="upcoming-task-list ${layoutClass}">${tasks.map(upcomingTaskCard).join('')}</div>`;
 }
 
 function renderDailyProgress(tasks) {
@@ -123,7 +165,7 @@ function reminderItem(task) {
 
 function dashboardNoteCard(note) {
   return `<div class="note-card dashboard-note-card" data-id="${note.id}">
-    <span class="history-icon dashboard-note-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20h4l11-11a2.1 2.1 0 0 0-4-4L4 16v4Zm9.5-13.5 4 4"/></svg></span>
+    <span class="history-icon dashboard-note-icon" aria-hidden="true">${materialIcon('edit')}</span>
     <div class="dashboard-note-content">
       <div class="note-title">${esc(note.title)}</div>
       <div class="note-body">${esc(note.content || '')}</div>

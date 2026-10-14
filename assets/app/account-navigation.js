@@ -284,7 +284,9 @@ function showView(view) {
   sessionStorage.setItem('tasktrack-current-view', view);
   $$('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.view === view));
   $$('.view').forEach(s => s.classList.toggle('active', s.id === 'view-' + view));
-  $('#view-title').textContent = view.charAt(0).toUpperCase() + view.slice(1);
+  const title = $('#view-title');
+  title.textContent = view.charAt(0).toUpperCase() + view.slice(1);
+  title.classList.toggle('dashboard-title', view === 'dashboard');
   loadView();
 }
 

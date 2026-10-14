@@ -24,7 +24,7 @@ function taskRow(t) {
   const od = isOverdue(t) ? '<span class="badge overdue">Overdue</span>' : '';
   const isComplete = t.status === 'done';
   return `<div class="task-row status-${t.status}" data-id="${t.id}">
-    <button class="status-dot" type="button" aria-label="Move task to ${STATUS[NEXT_STATUS[t.status]]}" title="Move to ${STATUS[NEXT_STATUS[t.status]]}"${isComplete ? ' disabled' : ''}></button>
+    <button class="status-dot" type="button" aria-label="Move task to ${STATUS[NEXT_STATUS[t.status]]}" title="Move to ${STATUS[NEXT_STATUS[t.status]]}"${isComplete ? ' disabled' : ''}>${materialIcon('check')}</button>
     <div class="task-main">
       <div class="task-title">${esc(t.title)} ${od}</div>
       <div class="task-desc">${esc(t.description || '')}</div>

@@ -1,5 +1,31 @@
 /* ================= Delegated clicks ================= */
 document.addEventListener('click', async e => {
+  const viewToggle = e.target.closest('#dash-task-view-toggle');
+  const viewMenu = $('#dash-task-view-menu');
+  if (viewToggle) {
+    viewMenu.hidden = !viewMenu.hidden;
+    viewToggle.setAttribute('aria-expanded', String(!viewMenu.hidden));
+    if (!viewMenu.hidden) viewMenu.querySelector('[aria-checked="true"]')?.focus();
+    return;
+  }
+
+  const viewChoice = e.target.closest('[data-dashboard-task-view]');
+  if (viewChoice) {
+    localStorage.setItem('tasktrack-dashboard-task-view', viewChoice.dataset.dashboardTaskView);
+    viewMenu.hidden = true;
+    $('#dash-task-view-toggle').setAttribute('aria-expanded', 'false');
+    const upcoming = state.tasks.filter(task => task.status !== 'done')
+      .sort((a, b) => String(a.due_date || '9999').localeCompare(String(b.due_date || '9999')))
+      .slice(0, 6);
+    renderUpcomingTasks(upcoming);
+    return;
+  }
+
+  if (!e.target.closest('.dashboard-task-view-control')) {
+    viewMenu.hidden = true;
+    $('#dash-task-view-toggle').setAttribute('aria-expanded', 'false');
+  }
+
   if (e.target.closest('#reminder-open-tasks')) {
     const bell = $('#reminder-open-tasks');
     const popover = $('#dashboard-reminder-popover');
@@ -64,4 +90,13 @@ document.addEventListener('click', async e => {
     const n = state.notes.find(x => String(x.id) === String(note.dataset.id));
     if (n) openNoteDetail(n);
   }
+});
+
+document.addEventListener('keydown', e => {
+  const menu = $('#dash-task-view-menu');
+  if (e.key !== 'Escape' || menu.hidden) return;
+  menu.hidden = true;
+  const toggle = $('#dash-task-view-toggle');
+  toggle.setAttribute('aria-expanded', 'false');
+  toggle.focus();
 });

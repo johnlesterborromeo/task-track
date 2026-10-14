@@ -44,12 +44,12 @@ function openTaskModal(task = null) {
     const checklist = task.checklist || [];
     $('#task-readonly-checklist-wrap').hidden = checklist.length === 0;
     $('#task-readonly-checklist').innerHTML = checklist.map(item =>
-      `<li${item.completed ? ' class="is-complete"' : ''}>${esc(item.title)}</li>`
+      `<li${item.completed ? ' class="is-complete"' : ''}><span class="task-readonly-checklist-icon">${materialIcon(item.completed ? 'task_alt' : 'check_box_outline_blank')}</span>${esc(item.title)}</li>`
     ).join('');
   }
   $('#btn-task-save').hidden = isComplete;
   $('#btn-task-close').hidden = !isComplete;
-  $('#btn-delete-task').style.display = task && !isComplete ? '' : 'none';
+  $('#btn-delete-task').style.display = task ? '' : 'none';
   const statusButton = $('#btn-task-status');
   statusButton.hidden = !task || isComplete;
   statusButton.classList.toggle('is-complete', task && task.status === 'in_progress');
@@ -147,8 +147,13 @@ $('#task-form').addEventListener('submit', async e => {
 });
 
 $('#btn-delete-task').addEventListener('click', async () => {
-  if (!confirm('Delete this task?')) return;
-  await send('delete_task', { id: $('#task-form').id.value });
+  const id = $('#task-form').id.value;
+  const task = state.tasks.find(item => String(item.id) === String(id));
+  const message = task?.status === 'done'
+    ? 'Delete this completed task? This cannot be undone.'
+    : 'Delete this task? This cannot be undone.';
+  if (!confirm(message)) return;
+  await send('delete_task', { id });
   closeModals();
   loadView();
 });

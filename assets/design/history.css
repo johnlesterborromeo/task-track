@@ -54,7 +54,7 @@
   color: var(--text); font-size: 17px;
 }
 .history-icon svg,
-.dashboard-note-icon svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.dashboard-note-icon svg { width: 19px; height: 19px; }
 .history-icon-note { background: var(--panel-2); color: var(--text); }
 .history-body { flex: 1; min-width: 0; font-size: 13.5px; }
 .history-details { overflow-wrap: anywhere; line-height: 1.5; }

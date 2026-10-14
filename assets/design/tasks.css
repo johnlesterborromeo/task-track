@@ -32,7 +32,8 @@
 .status-done .status-dot { border-color: var(--green); background: var(--green); }
 .status-in_progress .status-dot:hover,
 .status-done .status-dot:hover { outline: 1px solid var(--hover-outline); outline-offset: -2px; }
-.status-done .status-dot::after { content: ""; width: 8px; height: 4px; border-left: 2px solid #fff; border-bottom: 2px solid #fff; transform: translateY(-1px) rotate(-45deg); }
+.status-dot .material-icon { display: none; width: 14px; height: 14px; fill: #fff; }
+.status-done .status-dot .material-icon { display: block; }
 .status-done .task-title { text-decoration: line-through; color: var(--muted); }
 
 .task-main { flex: 1; min-width: 0; }
@@ -78,7 +79,7 @@
 .task-toolbar { justify-content: flex-start; }
 .task-filter-tools { display: flex; align-items: center; gap: 8px; flex: 1 1 520px; min-width: 0; }
 .task-search { position: relative; display: flex; align-items: center; flex: 1 1 190px; min-width: 150px; margin: 0; }
-.task-search svg { position: absolute; left: 11px; width: 17px; height: 17px; fill: none; stroke: var(--muted); stroke-width: 1.8; stroke-linecap: round; pointer-events: none; }
+.task-search svg { position: absolute; left: 11px; width: 17px; height: 17px; color: var(--muted); pointer-events: none; }
 .task-search input,
 .task-filter-tools select,
 .task-date-filter input {

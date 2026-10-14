@@ -56,7 +56,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     document.documentElement.dataset.theme = savedTheme;
   }
 </script>
-<link rel="stylesheet" href="assets/design/style.css?v=50">
+<link rel="stylesheet" href="assets/design/style.css?v=51">
+<link rel="stylesheet" href="assets/design/auth.css?v=50">
 </head>
 <body class="auth">
 <div class="auth-card">
