@@ -18,10 +18,10 @@ require_once __DIR__ . '/auth.php';
     document.documentElement.dataset.theme = savedTheme;
   }
 </script>
-<link rel="stylesheet" href="assets/design/style.css?v=159">
-<link rel="stylesheet" href="assets/design/dashboard.css?v=156">
+<link rel="stylesheet" href="assets/design/style.css?v=161">
+<link rel="stylesheet" href="assets/design/dashboard.css?v=158">
 <link rel="stylesheet" href="assets/design/tasks.css?v=153">
-<link rel="stylesheet" href="assets/design/notes.css?v=154">
+<link rel="stylesheet" href="assets/design/notes.css?v=156">
 <link rel="stylesheet" href="assets/design/calendar.css?v=152">
 <link rel="stylesheet" href="assets/design/history.css?v=152">
 <link rel="stylesheet" href="assets/design/modals.css?v=152">

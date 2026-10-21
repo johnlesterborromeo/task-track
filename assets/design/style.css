@@ -1,78 +1,78 @@
 @property --bg {
   syntax: "<color>";
   inherits: true;
-  initial-value: #0f1420;
+  initial-value: #0b1120;
 }
 @property --bg-2 {
   syntax: "<color>";
   inherits: true;
-  initial-value: #151b2e;
+  initial-value: #101827;
 }
 @property --panel {
   syntax: "<color>";
   inherits: true;
-  initial-value: #1a2238;
+  initial-value: #151f30;
 }
 @property --panel-2 {
   syntax: "<color>";
   inherits: true;
-  initial-value: #20294a;
+  initial-value: #1c293b;
 }
 @property --border {
   syntax: "<color>";
   inherits: true;
-  initial-value: #2b3554;
+  initial-value: #29384d;
 }
 @property --text {
   syntax: "<color>";
   inherits: true;
-  initial-value: #e6eaf5;
+  initial-value: #e6edf7;
 }
 @property --muted {
   syntax: "<color>";
   inherits: true;
-  initial-value: #8b94b3;
+  initial-value: #98a7bc;
 }
 @property --accent {
   syntax: "<color>";
   inherits: true;
-  initial-value: #5b8cff;
+  initial-value: #66a3ff;
 }
 @property --accent-2 {
   syntax: "<color>";
   inherits: true;
-  initial-value: #7c5bff;
+  initial-value: #a78bfa;
 }
 @property --panel-hover {
   syntax: "<color>";
   inherits: true;
-  initial-value: #283256;
+  initial-value: #223148;
 }
 @property --hover-outline {
   syntax: "<color>";
   inherits: true;
-  initial-value: #68738a;
+  initial-value: #52647d;
 }
 
 :root {
-  --bg: #0f1420;
-  --bg-2: #151b2e;
-  --panel: #1a2238;
-  --panel-2: #20294a;
-  --border: #2b3554;
-  --text: #e6eaf5;
-  --muted: #8b94b3;
-  --accent: #5b8cff;
-  --accent-2: #7c5bff;
-  --panel-hover: #283256;
-  --hover-outline: #68738a;
-  --green: #3ecf8e;
-  --amber: #ffb454;
-  --red: #ff6b6b;
-  --purple: #b98bff;
+  --bg: #0b1120;
+  --bg-2: #101827;
+  --panel: #151f30;
+  --panel-2: #1c293b;
+  --border: #29384d;
+  --text: #e6edf7;
+  --muted: #98a7bc;
+  --accent: #66a3ff;
+  --accent-2: #a78bfa;
+  --panel-hover: #223148;
+  --hover-outline: #52647d;
+  --green: #4adea5;
+  --amber: #f6bd60;
+  --red: #fb7185;
+  --purple: #c4a7ff;
   --radius: 12px;
-  --surface-shadow: 0 1px 2px rgba(0, 0, 0, .18), 0 1px 3px rgba(0, 0, 0, .18);
-  --sidebar-shadow: 1px 0 2px rgba(0, 0, 0, .1), 2px 0 6px rgba(0, 0, 0, .1);
+  --surface-shadow: 0 1px 2px rgba(0, 0, 0, .2), 0 8px 24px rgba(0, 0, 0, .12);
+  --sidebar-shadow: 1px 0 2px rgba(0, 0, 0, .16), 8px 0 24px rgba(0, 0, 0, .08);
   transition:
     --bg .24s ease,
     --bg-2 .24s ease,
@@ -105,6 +105,11 @@
 }
 
 :root:not([data-theme="light"]) { color-scheme: dark; }
+:root:not([data-theme="light"]) body {
+  background:
+    radial-gradient(ellipse at 68% -18%, rgba(55, 105, 172, .12), transparent 45%),
+    var(--bg);
+}
 @media (prefers-reduced-motion: reduce) {
   :root { transition: none; }
 }
@@ -267,7 +272,7 @@ body {
   transition: background .15s, color .15s;
 }
 .nav-btn:hover { outline: 1px solid var(--hover-outline); outline-offset: -2px; }
-.nav-btn.active { background: rgba(91,140,255,.18); color: var(--text); font-weight: 600; }
+.nav-btn.active { background: rgba(102,163,255,.16); color: var(--text); font-weight: 600; }
 .material-icon { display: block; width: 20px; height: 20px; flex: 0 0 auto; fill: currentColor; }
 .material-icon-definitions { position: absolute; width: 0; height: 0; overflow: hidden; }
 .nav-ico { display: inline-flex; width: 18px; color: var(--text); text-align: center; }
