@@ -16,7 +16,7 @@ document.addEventListener('click', async e => {
     $('#dash-task-view-toggle').setAttribute('aria-expanded', 'false');
     const upcoming = state.tasks.filter(task => task.status !== 'done')
       .sort((a, b) => String(a.due_date || '9999').localeCompare(String(b.due_date || '9999')))
-      .slice(0, 6);
+      .slice(0, 8);
     renderUpcomingTasks(upcoming);
     return;
   }

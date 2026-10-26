@@ -24,7 +24,7 @@ async function loadDashboard() {
 
   const upcoming = tasks.filter(t => t.status !== 'done')
     .sort((a, b) => String(a.due_date || '9999').localeCompare(String(b.due_date || '9999')))
-    .slice(0, 6);
+    .slice(0, 8);
   renderUpcomingTasks(upcoming);
 
   $('#dash-activity').innerHTML = `<div class="dashboard-history-list dashboard-preview-list">${

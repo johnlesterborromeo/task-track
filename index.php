@@ -446,13 +446,13 @@ require_once __DIR__ . '/auth.php';
 <script src="assets/app/app-core.js?v=58"></script>
 <script src="assets/app/account-navigation.js?v=57"></script>
 <script src="assets/app/helpers.js?v=56"></script>
-<script src="assets/app/dashboard.js?v=58"></script>
+<script src="assets/app/dashboard.js?v=59"></script>
 <script src="assets/app/tasks.js?v=57"></script>
 <script src="assets/app/notes.js?v=56"></script>
 <script src="assets/app/calendar.js?v=56"></script>
 <script src="assets/app/history.js?v=57"></script>
 <script src="assets/app/modals.js?v=58"></script>
-<script src="assets/app/events.js?v=57"></script>
+<script src="assets/app/events.js?v=58"></script>
 <script src="assets/app/init.js?v=56"></script>
 </body>
 </html>
